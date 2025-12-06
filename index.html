@@ -632,7 +632,17 @@ function rectIntersect(r1, r2) {
 function createExplosion(x, y, color, count=10) { for(let i=0; i<count; i++) particles.push(new Particle(x, y, color)); }
 function createFloatingText(x, y, text, color) { floatingTexts.push({x, y, text, color, life: 1.0}); }
 
-/* --- UPDATED MATH LOGIC: DIRECTED NUMBERS --- */
+
+// Helper function to format negative numbers with brackets
+const formatNegative = (num) => {
+    if (num < 0) {
+        return `(${num})`;
+    }
+    return String(num);
+};
+
+
+/* --- UPDATED MATH LOGIC: DIRECTED NUMBERS WITH BRACKETS --- */
 function generateMathProblem() {
     let operation = Math.floor(Math.random() * 4); // 0: Add, 1: Subtract, 2: Multiply, 3: Divide
     let a, b, c, d, ans, text;
@@ -660,10 +670,12 @@ function generateMathProblem() {
         
         if (operation === 0) {
             ans = a + b;
-            text = `${a} + ${b} = ?`;
-        } else { // operation === 1
+            // Apply bracket format to the second operand (b) if negative
+            text = `${a} + ${formatNegative(b)} = ?`;
+        } else { // operation === 1 (Subtraction)
             ans = a - b;
-            text = `${a} - ${b} = ?`;
+            // Apply bracket format to the second operand (b) if negative
+            text = `${a} - ${formatNegative(b)} = ?`;
         }
 
     } else if (operation === 2) {
@@ -672,9 +684,10 @@ function generateMathProblem() {
         d = Math.floor(Math.random() * 21) - 10; // -10 to 10
         
         ans = c * d;
-        text = `${c} × ${d} = ?`;
+        // Apply bracket format to the second operand (d) if negative
+        text = `${c} × ${formatNegative(d)} = ?`;
 
-    } else { // operation === 3
+    } else { // operation === 3 (Division)
         // 2. Division involving directed numbers (-10 to 10, ensures integer result)
         let num1 = Math.floor(Math.random() * 21) - 10; // -10 to 10
         let divisorPool = [];
@@ -686,15 +699,15 @@ function generateMathProblem() {
             }
         }
 
-        // If no divisors found (e.g., num1 is 0), retry (highly unlikely with the range)
         if (divisorPool.length === 0) { 
             return generateMathProblem(); 
         }
 
         d = divisorPool[Math.floor(Math.random() * divisorPool.length)];
-        c = num1; // Using num1 as the dividend (c)
+        c = num1; 
         ans = c / d;
-        text = `${c} ÷ ${d} = ?`;
+        // Apply bracket format to the divisor (d) if negative
+        text = `${c} ÷ ${formatNegative(d)} = ?`;
     }
 
     // --- BASE SET (Generate answer items) ---
