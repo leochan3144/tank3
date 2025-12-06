@@ -917,11 +917,10 @@ function initGame() {
         }
     }
     
-    // Adjusted initial base HP to 5 to match initial UI display
     p1 = new Tank(1, 165, 525, "#2ecc71", {up: "KeyW", down: "KeyS", left: "KeyA", right: "KeyD", shoot: "Space"});
     p2 = new Tank(2, 605, 45, "#3498db", {up: "ArrowUp", down: "ArrowDown", left: "ArrowLeft", right: "ArrowRight", shoot: "Enter"});
     
-    BASES.forEach(b => { b.hp = 5; b.active = true; });
+    BASES.forEach(b => { b.hp = 1; b.active = true; });
     bullets = []; items = []; particles = []; floatingTexts = [];
     gameOver = false;
     mathTimer = 0; 
