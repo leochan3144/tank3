@@ -632,45 +632,76 @@ function rectIntersect(r1, r2) {
 function createExplosion(x, y, color, count=10) { for(let i=0; i<count; i++) particles.push(new Particle(x, y, color)); }
 function createFloatingText(x, y, text, color) { floatingTexts.push({x, y, text, color, life: 1.0}); }
 
-/* --- UPDATED MATH LOGIC: IDENTICAL TWIN SETS --- */
+/* --- UPDATED MATH LOGIC: DIRECTED NUMBERS --- */
 function generateMathProblem() {
-    let isAdd = Math.random() > 0.5;
-    let a, b, ans;
-
-    if (isAdd) {
-        // --- ADDITION LOGIC: a + b <= 10, a >= 0, b >= 0 ---
-        a = Math.floor(Math.random() * 10); // a is 0 to 9
-        b = Math.floor(Math.random() * (10 - a + 1)); // b is 0 to (10 - a)
-        ans = a + b;
-    } else {
-        // --- SUBTRACTION LOGIC: 0 < b < a < 11 (max a is 10, min b is 1) ---
-        a = Math.floor(Math.random() * 9) + 2; // a is 2 to 10
-        b = Math.floor(Math.random() * (a - 1)) + 1; // b is 1 to a-1
-        ans = a - b;
-    }
+    let operation = Math.floor(Math.random() * 4); // 0: Add, 1: Subtract, 2: Multiply, 3: Divide
+    let a, b, c, d, ans, text;
 
     // Helper to generate a unique wrong answer
-    const getWrong = (existing) => {
-        let w = -1;
-        // Keep generating until w is non-negative AND unique
-        while(w < 0 || w === ans || existing.includes(w)) {
-            // Generate a wrong answer close to the correct one (ans +/- 1 to 5)
+    const getWrong = (existing, correctAns) => {
+        let w = correctAns;
+        // Keep generating until w is unique and different from the correct answer
+        while(w === correctAns || existing.includes(w)) {
+            // Generate a wrong answer close to the correct one (correctAns +/- 1 to 5)
             let diff = Math.floor(Math.random() * 5) + 1; // 1 to 5
             if (Math.random() < 0.5) diff *= -1; // +/-
-
-            w = ans + diff;
+            w = correctAns + diff;
             
-            // Re-check for bounds and uniqueness
-            if (w < 0 || w === ans) continue; 
+            // Re-check for uniqueness
+            if (w === correctAns) continue; 
         }
         return w;
     };
 
-    // --- BASE SET ---
+    if (operation === 0 || operation === 1) {
+        // 1. Addition and Subtraction involving directed numbers (-20 to 20)
+        a = Math.floor(Math.random() * 41) - 20; // -20 to 20
+        b = Math.floor(Math.random() * 41) - 20; // -20 to 20
+        
+        if (operation === 0) {
+            ans = a + b;
+            text = `${a} + ${b} = ?`;
+        } else { // operation === 1
+            ans = a - b;
+            text = `${a} - ${b} = ?`;
+        }
+
+    } else if (operation === 2) {
+        // 2. Multiplication involving directed numbers (-10 to 10)
+        c = Math.floor(Math.random() * 21) - 10; // -10 to 10
+        d = Math.floor(Math.random() * 21) - 10; // -10 to 10
+        
+        ans = c * d;
+        text = `${c} × ${d} = ?`;
+
+    } else { // operation === 3
+        // 2. Division involving directed numbers (-10 to 10, ensures integer result)
+        let num1 = Math.floor(Math.random() * 21) - 10; // -10 to 10
+        let divisorPool = [];
+
+        // Find all non-zero divisors for num1 in the range [-10, 10]
+        for (let i = -10; i <= 10; i++) {
+            if (i !== 0 && num1 % i === 0) {
+                divisorPool.push(i);
+            }
+        }
+
+        // If no divisors found (e.g., num1 is 0), retry (highly unlikely with the range)
+        if (divisorPool.length === 0) { 
+            return generateMathProblem(); 
+        }
+
+        d = divisorPool[Math.floor(Math.random() * divisorPool.length)];
+        c = num1; // Using num1 as the dividend (c)
+        ans = c / d;
+        text = `${c} ÷ ${d} = ?`;
+    }
+
+    // --- BASE SET (Generate answer items) ---
     // Contains 1 Correct, 2 Wrong
     let baseSet = [ans];
-    baseSet.push(getWrong(baseSet));
-    baseSet.push(getWrong(baseSet));
+    baseSet.push(getWrong(baseSet, ans));
+    baseSet.push(getWrong(baseSet, ans));
 
     let finalValues = [];
 
@@ -684,8 +715,9 @@ function generateMathProblem() {
     finalValues.sort(() => Math.random() - 0.5);
 
     spawnMathItems(finalValues, ans);
-    return { text: `${a} ${isAdd ? "+" : "-"} ${b} = ?`, answer: ans };
+    return { text: text, answer: ans };
 }
+/* --------------------------- */
 
 function spawnMathItems(valuesWithMeta, correctVal) {
     items = [];
@@ -885,10 +917,11 @@ function initGame() {
         }
     }
     
+    // Adjusted initial base HP to 5 to match initial UI display
     p1 = new Tank(1, 165, 525, "#2ecc71", {up: "KeyW", down: "KeyS", left: "KeyA", right: "KeyD", shoot: "Space"});
     p2 = new Tank(2, 605, 45, "#3498db", {up: "ArrowUp", down: "ArrowDown", left: "ArrowLeft", right: "ArrowRight", shoot: "Enter"});
     
-    BASES.forEach(b => { b.hp = 1; b.active = true; });
+    BASES.forEach(b => { b.hp = 5; b.active = true; });
     bullets = []; items = []; particles = []; floatingTexts = [];
     gameOver = false;
     mathTimer = 0; 
