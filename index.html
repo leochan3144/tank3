@@ -240,7 +240,8 @@
         
         /* SHIFT INFO STACKS FOR PORTRAIT 1 (P1: 65px Up, P2: 75px Down) */
         body.mode-portrait-1 #p1-zone .info-stack {
-            transform: translateY(-65px); /* KEPT at 65px Up */
+            /* ORIGINAL: -65px (UP 65px). NEW: -55px (UP 55px -> DOWN 10px) */
+            transform: translateY(-55px); 
         }
         body.mode-portrait-1 #p2-zone .info-stack {
             /* P2 is rotated 180deg. Local "-75px" (Up) = Screen "+75px" (Down). */
@@ -259,7 +260,8 @@
 
         /* D-PAD SHIFTS */
         body.mode-portrait-1 #p1-zone .controls-row {
-            margin-top: -75px; /* P1 D-pad Downward 5px (from -80px) */
+            /* ORIGINAL: -75px. NEW: -65px (UP 65px -> DOWN 10px) */
+            margin-top: -65px; 
         }
         body.mode-portrait-1 #p2-zone .controls-row {
             margin-top: -82px; /* P2 D-pad Upward 2px (from -80px) */
